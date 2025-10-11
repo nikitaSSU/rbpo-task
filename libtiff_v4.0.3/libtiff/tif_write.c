@@ -115,6 +115,8 @@ TIFFWriteScanline(TIFF* tif, void* buf, uint32 row, uint16 sample)
 		if (strip >= td->td_stripsperimage && imagegrew)
 			td->td_stripsperimage =
 			    TIFFhowmany_32(td->td_imagelength,td->td_rowsperstrip);
+		if (td->td_stripsperimage==0) 
+		        return (-1);
 		tif->tif_row =
 		    (strip % td->td_stripsperimage) * td->td_rowsperstrip;
 		if ((tif->tif_flags & TIFF_CODERSETUP) == 0) {
@@ -151,6 +153,7 @@ TIFFWriteScanline(TIFF* tif, void* buf, uint32 row, uint16 sample)
 			 * backup to the start and then decode
 			 * forward (below).
 			 */
+			 
 			tif->tif_row = (strip % td->td_stripsperimage) *
 			    td->td_rowsperstrip;
 			tif->tif_rawcp = tif->tif_rawdata;
@@ -219,7 +222,8 @@ TIFFWriteEncodedStrip(TIFF* tif, uint32 strip, void* data, tmsize_t cc)
 
         tif->tif_flags |= TIFF_BUF4WRITE;
 	tif->tif_curstrip = strip;
-
+        if (td->td_stripsperimage)
+          return (-1);
 	tif->tif_row = (strip % td->td_stripsperimage) * td->td_rowsperstrip;
 	if ((tif->tif_flags & TIFF_CODERSETUP) == 0) {
 		if (!(*tif->tif_setupencode)(tif))
@@ -247,7 +251,6 @@ TIFFWriteEncodedStrip(TIFF* tif, uint32 strip, void* data, tmsize_t cc)
 
     tif->tif_rawcc = 0;
     tif->tif_rawcp = tif->tif_rawdata;
-
 	tif->tif_flags &= ~TIFF_POSTENCODE;
 	sample = (uint16)(strip / td->td_stripsperimage);
 	if (!(*tif->tif_preencode)(tif, sample))
@@ -310,6 +313,7 @@ TIFFWriteRawStrip(TIFF* tif, uint32 strip, void* data, tmsize_t cc)
 		if (!TIFFGrowStrips(tif, 1, module))
 			return ((tmsize_t) -1);
 	}
+	
 	tif->tif_curstrip = strip;
 	tif->tif_row = (strip % td->td_stripsperimage) * td->td_rowsperstrip;
 	return (TIFFAppendToStrip(tif, strip, (uint8*) data, cc) ?

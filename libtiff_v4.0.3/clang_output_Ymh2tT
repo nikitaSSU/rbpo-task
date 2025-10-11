@@ -1,0 +1,10 @@
+conftest.c:102:16: error: ISO C requires a named parameter before '...'
+  102 | GLvoid (*func)(...); gluTessCallback(0, 0, func)
+      |                ^
+conftest.c:102:44: error: incompatible function pointer types passing 'GLvoid (*)(...)' (aka 'void (*)(...)') to parameter of type '_GLUfuncptr' (aka 'void (*)(void)') [-Wincompatible-function-pointer-types]
+  102 | GLvoid (*func)(...); gluTessCallback(0, 0, func)
+      |                                            ^~~~
+/usr/include/GL/glu.h:336:87: note: passing argument to parameter 'CallBackFunc' here
+  336 | GLAPI void GLAPIENTRY gluTessCallback (GLUtesselator* tess, GLenum which, _GLUfuncptr CallBackFunc);
+      |                                                                                       ^
+2 errors generated.
